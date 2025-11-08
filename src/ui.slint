@@ -19,9 +19,7 @@ component BigButton {
             vertical-alignment: center;
         }
 
-        TouchArea {
-            clicked => root.clicked();
-        }
+        TouchArea { clicked => root.clicked(); }
     }
 }
 
@@ -30,6 +28,7 @@ export component CalculatorView inherits Window {
     callback operation(op: CalculatorViewOp);
 
     in-out property <string> current_value: "0";
+    in-out property <string> expression: "";   // thêm dòng hiển thị biểu thức
     property <float> ui_scale: 3;
 
     VerticalLayout {
@@ -43,12 +42,21 @@ export component CalculatorView inherits Window {
             font-size: 18px * root.ui_scale;
         }
 
+        // Hiển thị biểu thức (dòng trên)
+        Text {
+            text: root.expression;
+            horizontal-alignment: right;
+            font-size: 14px * root.ui_scale;
+            color: #aaa;
+        }
+
+        // Hiển thị kết quả (dòng dưới)
         LineEdit {
             vertical-stretch: 0;
             horizontal-alignment: right;
             input-type: text;
             text: root.current_value;
-            font-size: 16px * root.ui_scale;
+            font-size: 18px * root.ui_scale;
             min-height: 35px * root.ui_scale;
         }
 

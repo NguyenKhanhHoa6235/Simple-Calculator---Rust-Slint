@@ -16,6 +16,7 @@ fn main() {
         if let (Some(state_rc), Some(ui)) = (state_weak.upgrade(), ui_weak.upgrade()) {
             let state = state_rc.borrow();
             ui.set_current_value(state.current.clone().into());
+            ui.set_expression(state.expression.clone().into()); // cập nhật dòng trên
         }
     };
 

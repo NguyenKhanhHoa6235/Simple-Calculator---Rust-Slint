@@ -1,0 +1,89 @@
+import { LineEdit } from "std-widgets.slint";
+
+export enum CalculatorViewOp { Add, Subtract, Multiply, Divide, Evaluate, Clear, Backspace, ToggleSign }
+
+component BigButton {
+    in property <string> text;
+    in property <length> text_size: 26px;
+    callback clicked;
+
+    Rectangle {
+        border-radius: 8px;
+        background: #01280e;
+        height: 40px;
+
+        Text {
+            text: root.text;
+            font-size: root.text_size;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        TouchArea {
+            clicked => root.clicked();
+        }
+    }
+}
+
+export component CalculatorView inherits Window {
+    callback input(digit: string);
+    callback operation(op: CalculatorViewOp);
+
+    in-out property <string> current_value: "0";
+    property <float> ui_scale: 3;
+
+    VerticalLayout {
+        alignment: stretch;
+        padding: 15px * root.ui_scale;
+        spacing: 8px * root.ui_scale;
+
+        Text {
+            text: "Simple Calculator - Slint";
+            horizontal-alignment: center;
+            font-size: 18px * root.ui_scale;
+        }
+
+        LineEdit {
+            vertical-stretch: 0;
+            horizontal-alignment: right;
+            input-type: text;
+            text: root.current_value;
+            font-size: 16px * root.ui_scale;
+            min-height: 35px * root.ui_scale;
+        }
+
+        GridLayout {
+            vertical-stretch: 1;
+            spacing: 6px * root.ui_scale;
+
+            // Row 1
+            BigButton { text: "7"; row: 0; col: 0; clicked => root.input("7"); }
+            BigButton { text: "8"; row: 0; col: 1; clicked => root.input("8"); }
+            BigButton { text: "9"; row: 0; col: 2; clicked => root.input("9"); }
+            BigButton { text: "/"; row: 0; col: 3; clicked => root.operation(CalculatorViewOp.Divide); }
+
+            // Row 2
+            BigButton { text: "4"; row: 1; col: 0; clicked => root.input("4"); }
+            BigButton { text: "5"; row: 1; col: 1; clicked => root.input("5"); }
+            BigButton { text: "6"; row: 1; col: 2; clicked => root.input("6"); }
+            BigButton { text: "*"; row: 1; col: 3; clicked => root.operation(CalculatorViewOp.Multiply); }
+
+            // Row 3
+            BigButton { text: "1"; row: 2; col: 0; clicked => root.input("1"); }
+            BigButton { text: "2"; row: 2; col: 1; clicked => root.input("2"); }
+            BigButton { text: "3"; row: 2; col: 2; clicked => root.input("3"); }
+            BigButton { text: "-"; row: 2; col: 3; clicked => root.operation(CalculatorViewOp.Subtract); }
+
+            // Row 4
+            BigButton { text: "0"; row: 3; col: 0; clicked => root.input("0"); }
+            BigButton { text: "."; row: 3; col: 1; clicked => root.input("."); }
+            BigButton { text: "="; row: 3; col: 2; clicked => root.operation(CalculatorViewOp.Evaluate); }
+            BigButton { text: "+"; row: 3; col: 3; clicked => root.operation(CalculatorViewOp.Add); }
+
+            // Row 5
+            BigButton { text: "C"; row: 4; col: 0; clicked => root.operation(CalculatorViewOp.Clear); }
+            BigButton { text: "←"; row: 4; col: 1; clicked => root.operation(CalculatorViewOp.Backspace); }
+            BigButton { text: "±"; row: 4; col: 2; clicked => root.operation(CalculatorViewOp.ToggleSign); }
+        }
+    }
+}

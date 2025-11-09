@@ -18,10 +18,15 @@ pub struct CalculatorState {
 }
 
 impl CalculatorState {
+    const MAX_LEN: usize = 16; // Giới hạn độ dài đầu vào
+
     /// Nhập chữ số (0–9)
     pub fn input_digit(&mut self, digit: u8) {
         if self.error {
             return;
+        }
+        if self.current.len() >= Self::MAX_LEN {
+            return; // bỏ qua nếu quá dài
         }
         if self.current == "0" {
             self.current.clear();
@@ -33,6 +38,9 @@ impl CalculatorState {
     /// Nhập dấu thập phân
     pub fn input_decimal(&mut self) {
         if self.error {
+            return;
+        }
+        if self.current.len() >= Self::MAX_LEN {
             return;
         }
         if !self.current.contains('.') {
@@ -177,5 +185,89 @@ impl CalculatorState {
     /// Clear toàn bộ
     pub fn clear(&mut self) {
         *self = CalculatorState::default();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_state() -> CalculatorState {
+        CalculatorState::default()
+    }
+
+    #[test]
+    fn test_addition_basic() {
+        let mut calc = make_state();
+        calc.input_digit(1);
+        calc.input_digit(2);
+        calc.set_op(Op::Add);
+        calc.input_digit(3);
+        calc.evaluate();
+        assert_eq!(calc.current, "15");
+    }
+
+    #[test]
+    fn test_multiply_by_zero() {
+        let mut calc = make_state();
+        calc.input_digit(5);
+        calc.set_op(Op::Mul);
+        calc.input_digit(0);
+        calc.evaluate();
+        assert_eq!(calc.current, "0");
+    }
+
+    #[test]
+    fn test_divide_by_zero_error() {
+        let mut calc = make_state();
+        calc.input_digit(9);
+        calc.set_op(Op::Div);
+        calc.input_digit(0);
+        calc.evaluate();
+        assert!(calc.error, "Expected divide-by-zero to set error flag");
+    }
+
+    #[test]
+    fn test_double_decimal_ignored() {
+        let mut calc = make_state();
+        calc.input_digit(1);
+        calc.input_decimal();
+        calc.input_decimal(); // should be ignored
+        calc.input_digit(5);
+        calc.set_op(Op::Add);
+        calc.input_digit(2);
+        calc.evaluate();
+        assert_eq!(calc.current, "3.5");
+    }
+
+    #[test]
+    fn test_repeat_evaluate() {
+        let mut calc = make_state();
+        calc.input_digit(5);
+        calc.set_op(Op::Add);
+        calc.input_digit(2);
+        calc.evaluate(); // 7
+        calc.evaluate(); // 7 + 2 again = 9
+        assert_eq!(calc.current, "9");
+    }
+
+    #[test]
+    fn test_backspace_behavior() {
+        let mut calc = make_state();
+        calc.input_digit(1);
+        calc.input_digit(0);
+        calc.backspace();
+        calc.backspace();
+        assert_eq!(calc.current, "0");
+    }
+
+    #[test]
+    fn test_too_long_input_truncated() {
+        let mut calc = make_state();
+        for _ in 0..30 {
+            calc.input_digit(9);
+        }
+        assert!(calc.current.len() <= CalculatorState::MAX_LEN);
+        assert!(!calc.error);
     }
 }
